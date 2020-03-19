@@ -170,6 +170,16 @@ def goal_check(x, y):
     else:
         return False
 
+def round_off(a):
+    return (round(a*2))
+
+def get_index(x, y, th):
+    i = round_off(x)
+    j = round_off(y)
+    k = th/30
+
+    return int(i), int(j), int(k)
+
 def check_collision(node):
     res = False
 
@@ -182,6 +192,30 @@ def check_collision(node):
     # print(res)
 
     return res
+
+def get_children(node, visited):
+    children = []
+
+    for i in range(360/theta):
+        th = i*(theta)
+        x_ = node.x + d * math.cos(th)
+        y_ = node.y + d * math.sin(th)
+
+        # print(x_, y_, th)
+
+        j, k, l = get_index(x_, y_, th)
+        if (j >= 600 or j < 0 or k >= 400 or k < 0):
+            continue
+        if(visited[j][k][l] == float('inf')):
+            # print("here")
+            new_node = explored_nodes(x_, y_, th, node, d)
+            if(not check_collision(new_node)):
+                children.append(new_node)
+        else:
+            # print("inside else")
+            children.append(explored_nodes(x_, y_, th, node, node.cost+d))
+
+    return children
 
 # main function
 if __name__ == '__main__':
