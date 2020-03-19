@@ -170,6 +170,18 @@ def goal_check(x, y):
     else:
         return False
 
+def check_collision(node):
+    res = False
+
+    for obs in world:
+        # print(res)
+        if(obs.check_collision(node.x, node.y)):
+            res = True
+            break;
+
+    # print(res)
+
+    return res
 
 # main function
 if __name__ == '__main__':
