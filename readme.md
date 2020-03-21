@@ -7,6 +7,7 @@ To run the program, enter the following in your terminal
 Upon running the script, the user will be prompted to enter the robot's radius, clerance, step size, desired starting configuration (x, y, theta) and the ending configuration (x, y). An error message will be displayed if any of the start or end points lie within the obstacle or outside the workspace. 
 
 ## Dependencies
-1. Numpy
-2. OpenCV
+1. Python 2.7
+2. Numpy
+3. OpenCV
 
