@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import math
 import map2
-from queue import PriorityQueue
+from Queue import PriorityQueue
 import time
 
 class explored_nodes:
@@ -147,6 +147,10 @@ def startPoint():
     sx = int(input('Enter x coordinate for start point: '))
     sy = int(input('Enter y coordinate for start point: '))
     s_th = int(input('Enter theta for start point: '))
+    if (sx < 0 or sx >= 300 or sy < 0 or sy >= 200):
+        print("Invalid input. Start point lies outside the map")
+        return None
+
     if (check_collision(explored_nodes(sx, sy, s_th, -1, 0))):
         print("Invalid input. Start point lies inside the obstacle")
         return None
@@ -157,6 +161,9 @@ def startPoint():
 def goalPoint():
     gx = int(input('Enter x coordinate for goal point: '))
     gy = int(input('Enter y coordinate for goal point: '))
+    if (gx < 0 or gx >= 300 or gy < 0 or gy >= 200):
+        print("Invalid input. Goal point lies outside the map")
+        return None
     if (check_collision(explored_nodes(gx, gy, 0, -1, 0))):
         print("Invalid input. Goal point lies inside the obstacle")
         return None
@@ -263,12 +270,15 @@ def is_start_node(node):
 # function to backtrace the path
 def backtrace(node):
 
+    rev_path =[]
     count = 1
     while (not is_start_node(node)):
-        path.append((node.x, node.y))
+        rev_path.append((node.x, node.y))
         node = node.parent
         count = count + 1
 
+    for i in range(len(rev_path)-1, -1, -1):
+        path.append(rev_path[i])
 
     return path
 
