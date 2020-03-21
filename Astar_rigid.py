@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import math
 import map2
-from Queue import PriorityQueue
+from queue import PriorityQueue
 import time
 
 class explored_nodes:
