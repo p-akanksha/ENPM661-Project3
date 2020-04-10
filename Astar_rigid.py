@@ -191,17 +191,20 @@ def goal_check(x, y):
         return False
 
 def round_off(a):
-    return (round(a*2))
+    return (round(a))
 
 def get_index(x, y, th):
     i = round_off(x/thresh_d)
     j = round_off(y/thresh_d)
-    k = th/30
+    k = round_off(th/thresh_theta)
 
     return int(i), int(j), int(k)
 
 def check_collision(node):
     res = False
+
+    if node.x >= int(10/0.1) or node.x < 0 or node.y >= int(10/0.1) or node.y < 0:
+        return True
 
     for obs in world:
         if(obs.check_collision(node.x, node.y)):
@@ -212,7 +215,7 @@ def check_collision(node):
 
 def get_loc(Xi, Yi, Thetai, UL, UR):
     t = 0
-    r = 0.038
+    r = 0.117
     L = 0.354
     dt = 0.1
     Xn = Xi
@@ -231,24 +234,36 @@ def get_loc(Xi, Yi, Thetai, UL, UR):
         t = t + dt
         Xs = Xn
         Ys = Yn
-        Xn += 0.5*r * (UL + UR) * math.cos(Thetan) * dt
-        Yn += 0.5*r * (UL + UR) * math.sin(Thetan) * dt
-        Thetan += (r / L) * (UR - UL) * dt
+        Xn += (2*math.pi/60)*(0.5*r * (UL + UR) * math.cos(Thetan) * dt)
+        Yn += (2*math.pi/60)*(0.5*r * (UL + UR) * math.sin(Thetan) * dt)
+        # Xn += (0.5*r * (UL + UR) * math.cos(Thetan) * dt)
+        # Yn += (0.5*r * (UL + UR) * math.sin(Thetan) * dt)
+        Thetan += (2*math.pi/60)*((r / L) * (UR - UL) * dt)
+        if (check_collision(explored_nodes(Xn, Yn, Thetan, -1, 0, None))):
+            return None, None, None, None, None, False
         temp = math.sqrt((Xn - Xs) ** 2 + (Yn - Ys) ** 2)
         dist = dist + temp
+        # plt.quiver(X0, Y0, X1, Y1,units='xy' ,scale=1,color= 'r',width =0.2, headwidth = 1,headlength=0)
         # plt.plot([Xs, Xn], [Ys, Yn], color="blue")
         loc.append([Xn, Yn])
 
-    if Thetan < 0:
-        Thetan = -Thetan
+    if Thetan > 6.28 or Thetan < -6.28:
+        n = int(Thetan/6.28)
+        Thetan = Thetan - n*6.28
+
     if Thetan > 3.14:
-        n = int(Thetan/3.14)
-        Thetan = Thetan - n*3.14
+        Thetan = Thetan - 6.28
+    elif Thetan < -3.14:
+        Thetan = Thetan + 6.28
+
+    # if Thetan < 0:
+    #     Thetan = 3.14 + Thetan
+
 
     Thetan = 180 * (Thetan) / 3.14
     # print(Thetan)
 
-    return Xn, Yn, Thetan, loc, dist
+    return Xn, Yn, Thetan, loc, dist, True
 
 def get_children(node, visited):
     children = []
@@ -267,18 +282,19 @@ def get_children(node, visited):
 
 
     for i in range(8):
-        x, y, th, loc, dist = get_loc(x_init, y_init, th_init, vel[i][0], vel[i][1])
-        # x_ = node.x + d * math.cos(math.radians(th))
-        # y_ = node.y + d * math.sin(math.radians(th))
-        # th = abs((node.th + i*(theta))%360)
+        # print(vel[i][0], vel[i][1])
+        x, y, th, loc, dist, check = get_loc(x_init, y_init, th_init, vel[i][0], vel[i][1])
+        # print("th: ", th)
 
-        j, k, l = get_index(x, y, th)
-        if (j >= int(10/thresh_d) or j < 0 or k >= int(10/thresh_d) or k < 0):
-            continue
-        if(visited[j][k][l] == 0):
-            new_node = explored_nodes(x, y, th, node, node.cost + dist, loc)
-            if(not check_collision(new_node)):
-                children.append(new_node)
+        if (check):
+            j, k, l = get_index(x, y, th)
+            if (j >= int(10/thresh_d) or j < 0 or k >= int(10/thresh_d) or k < 0):
+                continue
+            # print(j, k, l)
+            if(visited[j][k][l] == 0):
+                new_node = explored_nodes(x, y, th, node, node.cost + dist, loc)
+                if(not check_collision(new_node)):
+                    children.append(new_node)
 
     return children
 
@@ -305,6 +321,11 @@ def explorer(start_point, goal_point):
     while not pq.empty():
         top = pq.get()
         cur_node = top[1]
+        if count != 1:
+            par = cur_node.parent
+            # print(par.x)
+            # explored.append(((par.x, par.y), (cur_node.x, cur_node.y)))
+        explored.append((cur_node.x, cur_node.y))
         # if (count == 3):
         #     break
         #     print(count)
@@ -333,7 +354,7 @@ def explorer(start_point, goal_point):
             cost_to_come = child.cost
             if (cost_to_come < cost[p][q][r]):
                 # print(i, j, p, q)
-                explored.append(((cur_node.x, cur_node.y), (child.x, child.y)))
+                # explored.append(((cur_node.x, cur_node.y), (child.x, child.y)))
                 child.parent = cur_node
                 cost[p][q][r] = cost_to_come
                 estimated_cost = get_estimated_cost(child, goal_point)
@@ -374,31 +395,31 @@ if __name__ == '__main__':
     # get two RPM from user
     # rpm1 = int(input('Enter RPM1: '))
     # rpm2 = int(input('Enter RPM2: '))
-    rpm1 = 100
-    rpm2 = 50
+    rpm1 = 10
+    rpm2 = 20
 
 
     # get robot radius (177 mm)
     # r = int(input('Enter robot radius: '))
-    r = 0.177
+    R = 0.177
 
     # get clearance (100 mm)
     # c = int(input('Enter clearance: '))
-    c = 0.100
+    C = 0.05
 
     # get step size (100 mm)
     # d = int(input('Enter robot step size: '))
     # d = 0.01
 
     # wheel distance (354 mm)
-    l = 0.354
+    L = 0.354
 
     # get theta
     # theta = int(input('Enter mininum angle of turn: '))
-    theta = 30
+    # theta = 30
 
     # threshold
-    thresh = r+c
+    thresh = R + C
 
     # generate map
     world = world_map()
@@ -412,15 +433,15 @@ if __name__ == '__main__':
     print("goal_point", goal_point)
 
     # thresholds
-    thresh_d = 0.2
-    thresh_theta = 30
+    thresh_d = 0.1
+    thresh_theta = 10
 
     goal_node, explored = explorer(start_point, goal_point)
 
     if (goal_node != None):
         backtrace(goal_node)
         path = np.asarray(path)
-        print(path.shape)
+        print("path", path.shape)
         # print(path)
         m, n, _ = path.shape
         path = np.reshape(path, (n*m, 2))
@@ -442,7 +463,8 @@ if __name__ == '__main__':
     # # if count == len(explored):
     #     cv2.destroyAllWindows()
 
-    print(len(explored))
+    explored = np.asarray(explored)
+    print("explored", explored.shape)
 
     # count = 0
     # for points in explored:
@@ -520,11 +542,21 @@ if __name__ == '__main__':
     plt.ion()
     plt.show()
     count = 0
+    x_point = []
+    y_point = []
+    # for points in explored:
+    #     print(count)
+    #     count = count + 1
+    #     plt.plot( [points[0][0], points[1][0]], [points[0][1], points[1][1]], color='g', linewidth=0.3)   
+    #     plt.pause(0.01)
+
     for points in explored:
         # print(count)
-        count = count + 1
-        plt.plot( [points[0][0], points[1][0]], [points[0][1], points[1][1]], color='g', linewidth=0.3)   
-        plt.pause(0.01)
+        # print(points[0], points[1])
+        x_point.append(points[0])
+        y_point.append(points[1])
+
+    ax.scatter(x_point, y_point, s=0.05, color='b')
     
     plt.hold(True)
     loc_x=[start_point[0]]
@@ -533,9 +565,11 @@ if __name__ == '__main__':
         loc_x.append(loc[0])
         loc_y.append(loc[1])
    
-    ax.scatter(loc_x, loc_y, s=r, color='r')
+    ax.scatter(loc_x, loc_y, s=0.2, color='r')
 
-    plt.pause(10)
+    plt.savefig("Path.png")
+
+    plt.pause(60)
     #     cv2.circle(world_image, (x, y), r, (255, 0, 0))
     #     # rgb_w[int(cord[0]), int(cord[1]), :] = [255, 0, 0]
     #     cv2.imshow("Final Path", world_image)
