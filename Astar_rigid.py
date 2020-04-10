@@ -105,43 +105,43 @@ def world_map():
     w_map = []
 
     # obstacle1
-    points1 = [[0.25, 6.75, 1.75, 6.75, 0],
-               [1.75, 6.75, 1.75, 5.25, 0],
-               [1.75, 5.25, 0.25, 5.25, 1],
-               [0.25, 5.25, 0.25, 6.75, 1]]
+    points1 = [[-4.75, 1.75, -3.25, 1.75, 0],
+               [-3.25, 1.75, -3.25, 0.25, 0],
+               [-3.25, 0.25, -4.75, 0.25, 1],
+               [-4.75, 0.25, -4.75, 1.75, 1]]
 
     obs1 = obs_polygon(points1) 
     w_map.append(obs1)
 
     # obstacle2
-    points2 = [[2.25, 8.75, 3.75, 8.75, 0],
-               [3.75, 8.75, 3.75, 7.25, 0],
-               [3.75, 7.25, 2.25, 7.25, 1],
-               [2.25, 7.25, 2.25, 8.75, 1]]
+    points2 = [[-2.75, 3.75, -1.25, 3.75, 0],
+               [-1.25, 3.75, -1.25, 2.25, 0],
+               [-1.25, 2.25, -2.75, 2.25, 1],
+               [-2.75, 2.25, -2.75, 3.75, 1]]
 
     obs2 = obs_polygon(points2)
     w_map.append(obs2) 
 
     # obstacle3
-    points3 = [[8.25, 5.75, 9.75, 5.75, 0],
-               [9.75, 5.75, 9.75, 4.25, 0],
-               [9.75, 4.25, 8.25, 4.25, 1],
-               [8.25, 4.25, 8.25, 5.75, 1]]
+    points3 = [[3.25, 0.75, 4.75, 0.75, 0],
+               [4.75, 0.75, 4.75, -0.75, 0],
+               [4.75, -0.75, 3.25, -0.75, 1],
+               [3.25, -0.75, 3.25, 0.75, 1]]
 
     obs3 = obs_polygon(points3)
     w_map.append(obs3)
 
     # obstacle4
-    obs4 = obs_ellipse(3, 2, 1, 1, 1+thresh)
+    obs4 = obs_ellipse(-2, -3, 1, 1, 1+thresh)
     w_map.append(obs4)
     # obstacle5
-    obs5 = obs_ellipse(7, 2, 1, 1, 1+thresh)
+    obs5 = obs_ellipse(2, -3, 1, 1, 1+thresh)
     w_map.append(obs5)
     # obstacle6
-    obs6 = obs_ellipse(5, 5, 1, 1, 1+thresh)
+    obs6 = obs_ellipse(0, 0, 1, 1, 1+thresh)
     w_map.append(obs6)
     # obstacle7
-    obs7 = obs_ellipse(7, 8, 1, 1, 1+thresh)
+    obs7 = obs_ellipse(2, 3, 1, 1, 1+thresh)
     w_map.append(obs7)
 
     return w_map
@@ -151,10 +151,10 @@ def startPoint():
     # sx = int(input('Enter x coordinate for start point: '))
     # sy = int(input('Enter y coordinate for start point: '))
     # s_th = int(input('Enter theta for start point: '))
-    sx = 1
-    sy = 2
+    sx = -4
+    sy = -3
     s_th = 0
-    if (sx < 0 or sx >= 10 or sy < 0 or sy >= 10):
+    if (sx < -5 or sx >= 5 or sy < -5 or sy >= 5):
         print("Invalid input. Start point lies outside the map")
         return None
 
@@ -170,9 +170,9 @@ def goalPoint():
     # gy = int(input('Enter y coordinate for goal point: '))
     # gx = 8
     # gy = 6.5
-    gx = 5
-    gy = 2
-    if (gx < 0 or gx >= 10 or gy < 0 or gy >= 10):
+    gx = 0
+    gy = -3
+    if (gx < -5 or gx >= 5 or gy < -5 or gy >= 5):
         print("Invalid input. Goal point lies outside the map")
         return None
     if (check_collision(explored_nodes(gx, gy, 0, -1, 0, None, 0, 0))):
@@ -205,7 +205,7 @@ def get_index(x, y, th):
 def check_collision(node):
     res = False
 
-    if node.x >= int(10/0.1) or node.x < 0 or node.y >= int(10/0.1) or node.y < 0:
+    if node.x >= 5 or node.x < -5 or node.y >= 5 or node.y < -5:
         return True
 
     for obs in world:
@@ -290,7 +290,7 @@ def get_children(node, visited):
 
         if (check):
             j, k, l = get_index(x, y, th)
-            if (j >= int(10/thresh_d) or j < 0 or k >= int(10/thresh_d) or k < 0):
+            if (j >= int(5/thresh_d) or j < -int(5/thresh_d) or k >= int(5/thresh_d) or k < -int(5/thresh_d)):
                 continue
             # print(j, k, l)
             if(visited[j][k][l] == 0):
@@ -489,33 +489,33 @@ if __name__ == '__main__':
     fig=plt.figure()
     ax=fig.add_subplot(1,1,1)
     ax.axis('equal')
-    ax.set_xlim([-0.5,10.5])
-    ax.set_ylim([-0.5,10.5])
+    ax.set_xlim([-5.5, 5.5])
+    ax.set_ylim([-5.5, 5.5])
 
-    points1 = [[0.25, 6.75, 1.75, 6.75, 0],
-               [1.75, 6.75, 1.75, 5.25, 0],
-               [1.75, 5.25, 0.25, 5.25, 1],
-               [0.25, 5.25, 0.25, 6.75, 1]]
+    points1 = [[-4.75, 1.75, -3.25, 1.75, 0],
+               [-3.25, 1.75, -3.25, 0.25, 0],
+               [-3.25, 0.25, -4.75, 0.25, 1],
+               [-4.75, 0.25, -4.75, 1.75, 1]]
 
-    points2 = [[2.25, 8.75, 3.75, 8.75, 0],
-               [3.75, 8.75, 3.75, 7.25, 0],
-               [3.75, 7.25, 2.25, 7.25, 1],
-               [2.25, 7.25, 2.25, 8.75, 1]]
+    points2 = [[-2.75, 3.75, -1.25, 3.75, 0],
+               [-1.25, 3.75, -1.25, 2.25, 0],
+               [-1.25, 2.25, -2.75, 2.25, 1],
+               [-2.75, 2.25, -2.75, 3.75, 1]]
 
-    points3 = [[8.25, 5.75, 9.75, 5.75, 0],
-               [9.75, 5.75, 9.75, 4.25, 0],
-               [9.75, 4.25, 8.25, 4.25, 1],
-               [8.25, 4.25, 8.25, 5.75, 1]]
+    points3 = [[3.25, 0.75, 4.75, 0.75, 0],
+               [4.75, 0.75, 4.75, -0.75, 0],
+               [4.75, -0.75, 3.25, -0.75, 1],
+               [3.25, -0.75, 3.25, 0.75, 1]]
 
-    points4 = [[0, 10, 10, 10, 0],
-               [10, 10, 10, 0, 0],
-               [10, 0, 0, 0, 1],
-               [0, 0, 0, 10, 1]]
+    points4 = [[-5, 5, 5, 5, 0],
+               [5, 5, 5, -5, 0],
+               [5, -5, -5, -5, 1],
+               [-5, -5, -5, 5, 1]]
 
-    points5 = [[-0.2, 10.2, 10.2, 10.2, 0],
-               [10.2, 10.2, 10.2, -0.2, 0],
-               [10.2, -0.2, -0.2, -0.2, 1],
-               [-0.2, -0.2, -0.2, 10.2, 1]]
+    points5 = [[-5.2, 5.2, 5.2, 5.2, 0],
+               [5.2, 5.2, 5.2, -5.2, 0],
+               [5.2, -5.2, -5.2, -5.2, 1],
+               [-5.2, -5.2, -5.2, 5.2, 1]]
 
 
     for i in range (4):
@@ -527,12 +527,12 @@ if __name__ == '__main__':
         plt.plot( [points4[i][0], points4[i][2]], [points4[i][1], points4[i][3]], color='k', linewidth=1)
         plt.plot( [points5[i][0], points5[i][2]], [points5[i][1], points5[i][3]], color='k', linewidth=1)
 
-    circ1 = plt.Circle((3, 2), 1, fill = False)
-    circ2 = plt.Circle((7, 2), 1, fill = False)
-    circ3 = plt.Circle((5, 5), 1, fill = False)
-    circ4 = plt.Circle((7, 8), 1, fill = False)
-    circ5 = plt.Circle((goal_point[0], goal_point[1]), 0.2, fill = True, color = 'g')
-    circ6 = plt.Circle((start_point[0], start_point[1]), 0.2, fill = True, color = 'r')
+    circ1 = plt.Circle((-2, -3), 1, fill = False)
+    circ2 = plt.Circle((2, -3), 1, fill = False)
+    circ3 = plt.Circle((0, 0), 1, fill = False)
+    circ4 = plt.Circle((2, 3), 1, fill = False)
+    circ5 = plt.Circle((0, -3), 0.2, fill = True, color = 'g')
+    circ6 = plt.Circle((-4, -3), 0.2, fill = True, color = 'r')
     # ellipse = Ellipse(xy=(150,100), width=80, height=40, 
     #                         edgecolor='k', fc='None', lw=1)
 
@@ -546,6 +546,7 @@ if __name__ == '__main__':
 
     plt.ion()
     plt.show()
+    # plt.pause(60)
     count = 0
     x_point = []
     y_point = []
