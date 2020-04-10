@@ -217,7 +217,7 @@ def check_collision(node):
 
 def get_loc(Xi, Yi, Thetai, UL, UR):
     t = 0
-    r = 0.117
+    r = 0.038
     L = 0.354
     dt = 0.1
     Xn = Xi
@@ -263,7 +263,7 @@ def get_loc(Xi, Yi, Thetai, UL, UR):
 
 
     Thetan = 180 * (Thetan) / 3.14
-    # print(Thetan)
+    print(Xn, Yn)
 
     return Xn, Yn, Thetan, loc, dist, True
 
@@ -405,6 +405,9 @@ if __name__ == '__main__':
     # get robot radius (177 mm)
     # r = int(input('Enter robot radius: '))
     R = 0.177
+
+    # wheel radius
+    r = 0.038
 
     # get clearance (100 mm)
     # c = int(input('Enter clearance: '))
