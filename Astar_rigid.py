@@ -7,13 +7,15 @@ import time
 import matplotlib.pyplot as plt
 from matplotlib.patches import Ellipse
 class explored_nodes:
-    def __init__(self, x, y, th, parent, cost, loc):
+    def __init__(self, x, y, th, parent, cost, loc, UL, UR):
         self.x = x
         self.y = y
         self.th = th
         self.parent = parent
         self.cost = cost
         self.loc = loc
+        self.UR = UR
+        self.UL = UL
 
     def pretty_print(self):
         print(" ")
@@ -156,7 +158,7 @@ def startPoint():
         print("Invalid input. Start point lies outside the map")
         return None
 
-    if (check_collision(explored_nodes(sx, sy, s_th, -1, 0, None))):
+    if (check_collision(explored_nodes(sx, sy, s_th, -1, 0, None, 0, 0))):
         print("Invalid input. Start point lies inside the obstacle")
         return None
     return sx, sy, s_th
@@ -173,7 +175,7 @@ def goalPoint():
     if (gx < 0 or gx >= 10 or gy < 0 or gy >= 10):
         print("Invalid input. Goal point lies outside the map")
         return None
-    if (check_collision(explored_nodes(gx, gy, 0, -1, 0, None))):
+    if (check_collision(explored_nodes(gx, gy, 0, -1, 0, None, 0, 0))):
         print("Invalid input. Goal point lies inside the obstacle")
         return None
     return gx, gy
@@ -239,7 +241,7 @@ def get_loc(Xi, Yi, Thetai, UL, UR):
         # Xn += (0.5*r * (UL + UR) * math.cos(Thetan) * dt)
         # Yn += (0.5*r * (UL + UR) * math.sin(Thetan) * dt)
         Thetan += (2*math.pi/60)*((r / L) * (UR - UL) * dt)
-        if (check_collision(explored_nodes(Xn, Yn, Thetan, -1, 0, None))):
+        if (check_collision(explored_nodes(Xn, Yn, Thetan, -1, 0, None, 0, 0))):
             return None, None, None, None, None, False
         temp = math.sqrt((Xn - Xs) ** 2 + (Yn - Ys) ** 2)
         dist = dist + temp
@@ -292,7 +294,7 @@ def get_children(node, visited):
                 continue
             # print(j, k, l)
             if(visited[j][k][l] == 0):
-                new_node = explored_nodes(x, y, th, node, node.cost + dist, loc)
+                new_node = explored_nodes(x, y, th, node, node.cost + dist, loc, (2*math.pi/60)*vel[i][0], (2*math.pi/60)*vel[i][1])
                 if(not check_collision(new_node)):
                     children.append(new_node)
 
@@ -309,7 +311,7 @@ def explorer(start_point, goal_point):
     # print("visited: ", visited.shape)
     explored  = []
 
-    start_node = explored_nodes(start_point[0], start_point[1], start_point[2], -1, 0, None)
+    start_node = explored_nodes(start_point[0], start_point[1], start_point[2], -1, 0, None, 0, 0)
     estimated_cost = get_estimated_cost(start_node, goal_point)
     # i1, j1, _ = get_index(start_node.x, start_node.y, start_node.th)
 
@@ -378,6 +380,7 @@ def backtrace(node):
     count = 1
     while (not is_start_node(node)):
         path.append(node.loc)
+        vel.append((node.UL, node.UR))
         node = node.parent
         count = count + 1
 
@@ -428,6 +431,7 @@ if __name__ == '__main__':
 
     # Get points
     path = []
+    vel = []
     start_point = startPoint()
     goal_point = goalPoint()
     print("goal_point", goal_point)
@@ -445,6 +449,7 @@ if __name__ == '__main__':
         # print(path)
         m, n, _ = path.shape
         path = np.reshape(path, (n*m, 2))
+        vel = np.asarray(vel)
     else:
         print ("No path found")
 
