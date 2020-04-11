@@ -21,7 +21,7 @@ def get_going():
     # ccw rot is +ve
     angular = (right - left)/R 
 
-    cmd_vel = rospy.Publisher('cmd_vel/navi', Twist, queue_size=10)
+    cmd_vel = rospy.Publisher('cmd_vel_mux/input/navi', Twist, queue_size=10)
 
     move_cmd_init = Twist()
     move_cmd_init.linear.x = 0
