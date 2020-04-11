@@ -1,11 +1,15 @@
 # ENPM661-Project3
 This project is an implementation of A* path planning algorithm in a continuous workspace for a turtlebot, which is a non-holonomic robot. 
 
+To begin with, add the package in a catkin workspace and build the workspace using ```catkin build```.
+
 To find the path, run:
 
 ```$ python Astar_rigid.py```
 
-To run the simulation in ros, enter the following in one terminal 
+After the above program has completed, the simulation can be run in ros. 
+
+To run the simulation in ros, enter the following in one terminal. Note that the value after -x, -y, -Y in the below command are the starting x, y coordinates and theta respectively.
 
 ```$export ROBOT_INITIAL_POSE="-x -4 -y -3 -Y 0"```
 
