@@ -1,4 +1,6 @@
 import cv2
+import os
+import time
 import numpy as np
 import math
 import map2
@@ -170,8 +172,8 @@ def goalPoint():
     # gy = int(input('Enter y coordinate for goal point: '))
     # gx = 8
     # gy = 6.5
-    gx = 0
-    gy = -3
+    gx = 4
+    gy = 2.5
     if (gx < -5 or gx >= 5 or gy < -5 or gy >= 5):
         print("Invalid input. Goal point lies outside the map")
         return None
@@ -263,7 +265,7 @@ def get_loc(Xi, Yi, Thetai, UL, UR):
 
 
     Thetan = 180 * (Thetan) / 3.14
-    print(Xn, Yn)
+    # print(Xn-Xi, Yn-Yi, Thetan - Thetai)
 
     return Xn, Yn, Thetan, loc, dist, True
 
@@ -291,17 +293,26 @@ def get_children(node, visited):
         if (check):
             j, k, l = get_index(x, y, th)
             if (j >= int(5/thresh_d) or j < -int(5/thresh_d) or k >= int(5/thresh_d) or k < -int(5/thresh_d)):
+                # print("Skipping ", vel[i][0], vel[i][1])
                 continue
             # print(j, k, l)
             if(visited[j][k][l] == 0):
                 new_node = explored_nodes(x, y, th, node, node.cost + dist, loc, (2*math.pi/60)*vel[i][0], (2*math.pi/60)*vel[i][1])
                 if(not check_collision(new_node)):
                     children.append(new_node)
+        #         else:
+        #             print("Skipping (collision) ", vel[i][0], vel[i][1])
+        #     else:
+        #         print("Skipping (visited) ", vel[i][0], vel[i][1])
+        # else:
+        #     print("Skipping (ckeck) ", vel[i][0], vel[i][1])
 
     return children
 
 # function to explore neighbors and lot more
 def explorer(start_point, goal_point):
+    open('Nodes.txt', 'w').close() 
+    f = open("Nodes.txt", "a+")
     # create visited and cost array
     size_x = int(10/thresh_d)
     size_y = int(10/thresh_d)
@@ -327,12 +338,13 @@ def explorer(start_point, goal_point):
             par = cur_node.parent
             # print(par.x)
             # explored.append(((par.x, par.y), (cur_node.x, cur_node.y)))
-        explored.append((cur_node.x, cur_node.y))
+        # explored.append((cur_node.x, cur_node.y))
         # if (count == 3):
         #     break
         #     print(count)
         #     return cur_node, explored
         # explored.append(cur_node)
+        f.write(str(cur_node) + '\n')
         x = cur_node.x
         y = cur_node.y
         i, j, k = get_index(x, y, cur_node.th)
@@ -342,13 +354,14 @@ def explorer(start_point, goal_point):
         visited[i][j][k] = 1
         if goal_check(x, y):
             print("goal reached")
+            f.close()
             return cur_node, explored
 
         children = get_children(cur_node, visited)
         # print("Iteration #:", count)
         # for c in children:
         #     c.pretty_print()
-        # print(children)
+        # print(len(children))
         for child in children:
             # child.pretty_print()
             p, q, r = get_index(child.x, child.y, child.th)
@@ -356,7 +369,7 @@ def explorer(start_point, goal_point):
             cost_to_come = child.cost
             if (cost_to_come < cost[p][q][r]):
                 # print(i, j, p, q)
-                # explored.append(((cur_node.x, cur_node.y), (child.x, child.y)))
+                explored.append(((cur_node.x, cur_node.y), (child.x, child.y)))
                 child.parent = cur_node
                 cost[p][q][r] = cost_to_come
                 estimated_cost = get_estimated_cost(child, goal_point)
@@ -365,6 +378,7 @@ def explorer(start_point, goal_point):
             # print(cost[p][q][r])
         count = count + 1
 
+    f.close()
     return None, explored
 
 def is_start_node(node):
@@ -377,14 +391,19 @@ def is_start_node(node):
 # function to backtrace the path
 def backtrace(node):
 
+    open('nodePath.txt', 'w').close() 
+    f = open("nodePath.txt", "a+")
+    content = f.read()
+    # f.seek(0, 0)
     count = 1
     while (not is_start_node(node)):
         path.append(node.loc)
         vel.append((node.UL, node.UR))
         node = node.parent
         count = count + 1
-
-
+        f.write(str(node) + '\n' + content)
+    
+    f.close()
     return path
     # if is_start_node(node):
     #     return path
@@ -399,7 +418,7 @@ if __name__ == '__main__':
     # rpm1 = int(input('Enter RPM1: '))
     # rpm2 = int(input('Enter RPM2: '))
     rpm1 = 10
-    rpm2 = 20
+    rpm2 = 15
 
 
     # get robot radius (177 mm)
@@ -409,7 +428,7 @@ if __name__ == '__main__':
     # wheel radius
     r = 0.038
 
-    # get clearance (100 mm)
+    # get clearance (50 mm)
     # c = int(input('Enter clearance: '))
     C = 0.05
 
@@ -443,6 +462,8 @@ if __name__ == '__main__':
     thresh_d = 0.1
     thresh_theta = 10
 
+    t = time.time()
+
     goal_node, explored = explorer(start_point, goal_point)
 
     if (goal_node != None):
@@ -458,8 +479,13 @@ if __name__ == '__main__':
 
      # = []
 
+    # stop timer
+    temp_t = t
+    t = time.time()
+
     # print(len(path))
     print("All done")
+    print('Time taken by algorithm: ', t - temp_t, 'sec')
 
     # for loc in path:
     #     print(loc)
@@ -534,8 +560,8 @@ if __name__ == '__main__':
     circ2 = plt.Circle((2, -3), 1, fill = False)
     circ3 = plt.Circle((0, 0), 1, fill = False)
     circ4 = plt.Circle((2, 3), 1, fill = False)
-    circ5 = plt.Circle((0, -3), 0.2, fill = True, color = 'g')
-    circ6 = plt.Circle((-4, -3), 0.2, fill = True, color = 'r')
+    circ5 = plt.Circle((goal_point[0], goal_point[1]), 0.2, fill = True, color = 'g')
+    circ6 = plt.Circle((start_point[0], start_point[1]), 0.2, fill = True, color = 'r')
     # ellipse = Ellipse(xy=(150,100), width=80, height=40, 
     #                         edgecolor='k', fc='None', lw=1)
 
@@ -546,26 +572,44 @@ if __name__ == '__main__':
     ax.add_patch(circ5)
     ax.add_patch(circ6)
     # ax.add_patch(ellipse)
+    plt.savefig("background.png")
+    temp_img = cv2.imread("background.png")
+    print(temp_img.shape)
 
-    plt.ion()
-    plt.show()
+    out = cv2.VideoWriter('Astar.avi', cv2.VideoWriter_fourcc(*'DIVX'), 15,
+                              (temp_img.shape[1], temp_img.shape[0]))
+
+    # plt.ion()
+    # plt.show()
     # plt.pause(60)
     count = 0
     x_point = []
     y_point = []
-    # for points in explored:
-    #     print(count)
-    #     count = count + 1
-    #     plt.plot( [points[0][0], points[1][0]], [points[0][1], points[1][1]], color='g', linewidth=0.3)   
-    #     plt.pause(0.01)
-
     for points in explored:
-        # print(count)
-        # print(points[0], points[1])
-        x_point.append(points[0])
-        y_point.append(points[1])
+        count = count + 1
+        plt.plot( [points[0][0], points[1][0]], [points[0][1], points[1][1]], color='g', linewidth=0.3)   
+        # plt.pause(0.01)
+        if count%10 == 0:
+            plt.savefig("Frames/frame" + str(count/10) + ".png")
+            frame = cv2.imread("Frames/frame" + str(count/10) + ".png")
+            # print(frame.shape)
+            out.write(frame)
+        if count%1000 == 0:
+            print(count)
+    # out.release()
 
-    ax.scatter(x_point, y_point, s=0.05, color='b')
+    # for points in explored:
+    #     # print(count)
+    #     # print(points[0], points[1])
+    #     # x_point.append(points[0])
+    #     # y_point.append(points[1])
+    #     x_point.append(points[0][0])
+    #     y_point.append(points[0][1])
+    #     x_point.append(points[1][0])
+    #     y_point.append(points[1][1])
+
+    # plt.ion()
+    # ax.scatter(x_point, y_point, s=0.05, color='b')
     
     plt.hold(True)
     loc_x=[start_point[0]]
@@ -576,9 +620,34 @@ if __name__ == '__main__':
    
     ax.scatter(loc_x, loc_y, s=0.2, color='r')
 
-    plt.savefig("Path.png")
+    plt.savefig("Frames/frame" + str(count) + ".png")
+    path_img = cv2.imread("Frames/frame" + str(count) + ".png")
+    for i in range(75):
+        out.write(path_img)
 
-    plt.pause(60)
+    out.release() 
+
+    plt.show()
+
+    # plt.savefig("Path.png")
+
+    # plt.pause(60)
+
+    # cur_dir = os.path.dirname(os.path.abspath(__file__))
+    # img_path = os.path.join(cur_dir, "Frames")
+
+    # temp_img = cv2.imread(os.path.join(img_path, "frame1.png"))
+
+    # out = cv2.VideoWriter('Astar.avi', cv2.VideoWriter_fourcc(*'DIVX'), 15,
+    #                           (temp_img.shape[1], temp_img.shape[0]))
+
+    # frames = []
+    # for name in os.listdir(img_path):
+    #     frame = cv2.imread(os.path.join(img_path, name))
+    #     out.write(frame)
+    #     # frames.append(frame)
+    # out.release()
+
     #     cv2.circle(world_image, (x, y), r, (255, 0, 0))
     #     # rgb_w[int(cord[0]), int(cord[1]), :] = [255, 0, 0]
     #     cv2.imshow("Final Path", world_image)
