@@ -1,0 +1,23 @@
+<!-- export ROBOT_INITIAL_POSE="-x -4 -y -3 -Y 0" -->
+<launch>
+	<arg name="x_s"/>
+  	<arg name="y_s"/>
+  	<arg name="theta"/>
+
+	<include file="$(find turtlebot_gazebo)/launch/turtlebot_world.launch">
+	<arg name="world_file" value="$(find turtlebot_astar)/worlds/map.world"/>
+	</include>
+
+	<!-- <node name="spawn_turtlebot_model" pkg="gazebo_ros" type="spawn_model"
+         args="-x $(arg x_s) -y $(arg y_s) -Y $(arg theta) -unpause -urdf -param robot_description -model turtlebot"/> -->
+
+	<!--node name="A star" pkg ="turtlebot_astar" type="Astar_rigid.py"/> -->
+
+	<!-- <node name="spawn_turtlebot_model" pkg="gazebo_ros" type="spawn_model"
+         args="-x 5 -y 0 -Y 0 -unpause -urdf -param robot_description -model turtlebot"/>  -->
+
+        
+</launch>
+  
+  
+
