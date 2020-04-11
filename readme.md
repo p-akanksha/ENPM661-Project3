@@ -30,5 +30,6 @@ Remember to source your workspace before that!
 1. Python 2.7
 2. Numpy
 3. OpenCV
-4. ROS Kinetic
+4. ROS Kinetic 
+5. Gazebo
 
