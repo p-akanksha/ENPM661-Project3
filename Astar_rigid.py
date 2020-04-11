@@ -8,6 +8,7 @@ from Queue import PriorityQueue
 import time
 import matplotlib.pyplot as plt
 from matplotlib.patches import Ellipse
+
 class explored_nodes:
     def __init__(self, x, y, th, parent, cost, loc, UL, UR):
         self.x = x
@@ -148,6 +149,71 @@ def world_map():
 
     return w_map
 
+# function to visualize map
+def visualizeMap():
+    fig=plt.figure()
+    ax=fig.add_subplot(1,1,1)
+    ax.axis('equal')
+    ax.set_xlim([-5.5, 5.5])
+    ax.set_ylim([-5.5, 5.5])
+
+    # obstacle 1
+    points1 = [[-4.75, 1.75, -3.25, 1.75, 0],
+               [-3.25, 1.75, -3.25, 0.25, 0],
+               [-3.25, 0.25, -4.75, 0.25, 1],
+               [-4.75, 0.25, -4.75, 1.75, 1]]
+
+    # obstacle 2
+    points2 = [[-2.75, 3.75, -1.25, 3.75, 0],
+               [-1.25, 3.75, -1.25, 2.25, 0],
+               [-1.25, 2.25, -2.75, 2.25, 1],
+               [-2.75, 2.25, -2.75, 3.75, 1]]
+
+    # obstacle 3
+    points3 = [[3.25, 0.75, 4.75, 0.75, 0],
+               [4.75, 0.75, 4.75, -0.75, 0],
+               [4.75, -0.75, 3.25, -0.75, 1],
+               [3.25, -0.75, 3.25, 0.75, 1]]
+
+    # world boundary 1
+    points4 = [[-5, 5, 5, 5, 0],
+               [5, 5, 5, -5, 0],
+               [5, -5, -5, -5, 1],
+               [-5, -5, -5, 5, 1]]
+
+    # world boundary 2
+    points5 = [[-5.2, 5.2, 5.2, 5.2, 0],
+               [5.2, 5.2, 5.2, -5.2, 0],
+               [5.2, -5.2, -5.2, -5.2, 1],
+               [-5.2, -5.2, -5.2, 5.2, 1]]
+
+
+    for i in range (4):
+        plt.plot( [points1[i][0], points1[i][2]], [points1[i][1], points1[i][3]], color='k', linewidth=1)   
+        plt.plot( [points2[i][0], points2[i][2]], [points2[i][1], points2[i][3]], color='k', linewidth=1)
+        plt.plot( [points3[i][0], points3[i][2]], [points3[i][1], points3[i][3]], color='k', linewidth=1)
+        plt.plot( [points4[i][0], points4[i][2]], [points4[i][1], points4[i][3]], color='k', linewidth=1)
+        plt.plot( [points5[i][0], points5[i][2]], [points5[i][1], points5[i][3]], color='k', linewidth=1)
+
+    # circular obstacles
+    circ1 = plt.Circle((-2, -3), 1, fill = False)
+    circ2 = plt.Circle((2, -3), 1, fill = False)
+    circ3 = plt.Circle((0, 0), 1, fill = False)
+    circ4 = plt.Circle((2, 3), 1, fill = False)
+
+    # start and goal points
+    circ5 = plt.Circle((goal_point[0], goal_point[1]), 0.2, fill = True, color = 'g')
+    circ6 = plt.Circle((start_point[0], start_point[1]), 0.2, fill = True, color = 'r')
+
+    ax.add_patch(circ1)
+    ax.add_patch(circ2)
+    ax.add_patch(circ3)
+    ax.add_patch(circ4)
+    ax.add_patch(circ5)
+    ax.add_patch(circ6)
+
+    return fig, ax
+
 # function to get start points
 def startPoint():
     # sx = int(input('Enter x coordinate for start point: '))
@@ -156,12 +222,12 @@ def startPoint():
     sx = -4
     sy = -3
     s_th = 0
-    if (sx < -5 or sx >= 5 or sy < -5 or sy >= 5):
-        print("Invalid input. Start point lies outside the map")
+    if (sx <= -5 or sx >= 5 or sy <= -5 or sy >= 5):
+        print("Invalid input. Start point either lies on boundry or lies outside the map")
         return None
 
     if (check_collision(explored_nodes(sx, sy, s_th, -1, 0, None, 0, 0))):
-        print("Invalid input. Start point lies inside the obstacle")
+        print("Invalid input. Start point lies inside the obstacle or is too close to obstacle")
         return None
     return sx, sy, s_th
 
@@ -172,13 +238,13 @@ def goalPoint():
     # gy = int(input('Enter y coordinate for goal point: '))
     # gx = 8
     # gy = 6.5
-    gx = 4
-    gy = 2.5
-    if (gx < -5 or gx >= 5 or gy < -5 or gy >= 5):
-        print("Invalid input. Goal point lies outside the map")
+    gx = -2
+    gy = -1
+    if (gx <= -5 or gx >= 5 or gy <= -5 or gy >= 5):
+        print("Invalid input. Goal point either lies on boundry or lies outside the map")
         return None
     if (check_collision(explored_nodes(gx, gy, 0, -1, 0, None, 0, 0))):
-        print("Invalid input. Goal point lies inside the obstacle")
+        print("Invalid input. Goal point lies inside the obstacle or is too close to obstacle")
         return None
     return gx, gy
 
@@ -194,6 +260,12 @@ def goal_check(x, y):
     else:
         return False
 
+def start_check(node):
+    if(node.x == start_point[0] and node.y == start_point[1]):
+        return True
+
+    return False
+
 def round_off(a):
     return (round(a))
 
@@ -207,7 +279,7 @@ def get_index(x, y, th):
 def check_collision(node):
     res = False
 
-    if node.x >= 5 or node.x < -5 or node.y >= 5 or node.y < -5:
+    if node.x >= 5 or node.x <= -5 or node.y >= 5 or node.y <= -5:
         return True
 
     for obs in world:
@@ -226,10 +298,6 @@ def get_loc(Xi, Yi, Thetai, UL, UR):
     Yn = Yi
     Thetan = 3.14 * Thetai / 180
 
-    # Xi, Yi,Thetai: Input point's coordinates
-    # Xs, Ys: Start point coordinates for plot function
-    # Xn, Yn, Thetan: End point coordintes
-
     loc = []
     loc.append([Xn, Yn])
     dist = 0
@@ -240,15 +308,13 @@ def get_loc(Xi, Yi, Thetai, UL, UR):
         Ys = Yn
         Xn += (2*math.pi/60)*(0.5*r * (UL + UR) * math.cos(Thetan) * dt)
         Yn += (2*math.pi/60)*(0.5*r * (UL + UR) * math.sin(Thetan) * dt)
-        # Xn += (0.5*r * (UL + UR) * math.cos(Thetan) * dt)
-        # Yn += (0.5*r * (UL + UR) * math.sin(Thetan) * dt)
         Thetan += (2*math.pi/60)*((r / L) * (UR - UL) * dt)
+        
         if (check_collision(explored_nodes(Xn, Yn, Thetan, -1, 0, None, 0, 0))):
             return None, None, None, None, None, False
+        
         temp = math.sqrt((Xn - Xs) ** 2 + (Yn - Ys) ** 2)
         dist = dist + temp
-        # plt.quiver(X0, Y0, X1, Y1,units='xy' ,scale=1,color= 'r',width =0.2, headwidth = 1,headlength=0)
-        # plt.plot([Xs, Xn], [Ys, Yn], color="blue")
         loc.append([Xn, Yn])
 
     if Thetan > 6.28 or Thetan < -6.28:
@@ -260,12 +326,7 @@ def get_loc(Xi, Yi, Thetai, UL, UR):
     elif Thetan < -3.14:
         Thetan = Thetan + 6.28
 
-    # if Thetan < 0:
-    #     Thetan = 3.14 + Thetan
-
-
     Thetan = 180 * (Thetan) / 3.14
-    # print(Xn-Xi, Yn-Yi, Thetan - Thetai)
 
     return Xn, Yn, Thetan, loc, dist, True
 
@@ -286,117 +347,88 @@ def get_children(node, visited):
 
 
     for i in range(8):
-        # print(vel[i][0], vel[i][1])
         x, y, th, loc, dist, check = get_loc(x_init, y_init, th_init, vel[i][0], vel[i][1])
-        # print("th: ", th)
 
         if (check):
             j, k, l = get_index(x, y, th)
             if (j >= int(5/thresh_d) or j < -int(5/thresh_d) or k >= int(5/thresh_d) or k < -int(5/thresh_d)):
-                # print("Skipping ", vel[i][0], vel[i][1])
                 continue
-            # print(j, k, l)
+
             if(visited[j][k][l] == 0):
                 new_node = explored_nodes(x, y, th, node, node.cost + dist, loc, (2*math.pi/60)*vel[i][0], (2*math.pi/60)*vel[i][1])
                 if(not check_collision(new_node)):
                     children.append(new_node)
-        #         else:
-        #             print("Skipping (collision) ", vel[i][0], vel[i][1])
-        #     else:
-        #         print("Skipping (visited) ", vel[i][0], vel[i][1])
-        # else:
-        #     print("Skipping (ckeck) ", vel[i][0], vel[i][1])
 
     return children
 
 # function to explore neighbors and lot more
 def explorer(start_point, goal_point):
+    # text file to save visited nodes
     open('Nodes.txt', 'w').close() 
     f = open("Nodes.txt", "a+")
+    
     # create visited and cost array
     size_x = int(10/thresh_d)
     size_y = int(10/thresh_d)
     size_z = 360/thresh_theta
     visited = np.asarray([[[0] * size_z] * size_y]* size_x)
     cost = np.asarray([[[float('inf')] * size_z] * size_y]* size_x)
-    # print("visited: ", visited.shape)
     explored  = []
 
     start_node = explored_nodes(start_point[0], start_point[1], start_point[2], -1, 0, None, 0, 0)
     estimated_cost = get_estimated_cost(start_node, goal_point)
-    # i1, j1, _ = get_index(start_node.x, start_node.y, start_node.th)
 
+    # initialize priority queue
     pq = PriorityQueue()
     pq.put((estimated_cost, start_node))
 
     count = 1
 
     while not pq.empty():
+        # get the node with lowest cost
         top = pq.get()
         cur_node = top[1]
-        if count != 1:
-            par = cur_node.parent
-            # print(par.x)
-            # explored.append(((par.x, par.y), (cur_node.x, cur_node.y)))
-        # explored.append((cur_node.x, cur_node.y))
-        # if (count == 3):
-        #     break
-        #     print(count)
-        #     return cur_node, explored
-        # explored.append(cur_node)
+
+        # write node in text file
         f.write(str(cur_node) + '\n')
+
+        # mark the node as visited
         x = cur_node.x
         y = cur_node.y
         i, j, k = get_index(x, y, cur_node.th)
-        # print(i, j, k)
-        if(pq.qsize() == 1):
-            print("almost there")
         visited[i][j][k] = 1
+
+        # check if this is the goal
         if goal_check(x, y):
             print("goal reached")
             f.close()
             return cur_node, explored
 
+        # get node children
         children = get_children(cur_node, visited)
-        # print("Iteration #:", count)
-        # for c in children:
-        #     c.pretty_print()
-        # print(len(children))
         for child in children:
-            # child.pretty_print()
             p, q, r = get_index(child.x, child.y, child.th)
-            # print(cost[p][q][r])
             cost_to_come = child.cost
             if (cost_to_come < cost[p][q][r]):
-                # print(i, j, p, q)
                 explored.append(((cur_node.x, cur_node.y), (child.x, child.y)))
                 child.parent = cur_node
                 cost[p][q][r] = cost_to_come
                 estimated_cost = get_estimated_cost(child, goal_point)
-                # print("estimated_cost: ", estimated_cost)
                 pq.put((estimated_cost, child))
-            # print(cost[p][q][r])
         count = count + 1
 
     f.close()
     return None, explored
 
-def is_start_node(node):
-    if(node.x == start_point[0] and node.y == start_point[1]):
-        return True
-
-    return False
-
-
 # function to backtrace the path
 def backtrace(node):
-
+    # text file to save node in path
     open('nodePath.txt', 'w').close() 
     f = open("nodePath.txt", "a+")
     content = f.read()
-    # f.seek(0, 0)
+
     count = 1
-    while (not is_start_node(node)):
+    while (not start_check(node)):
         path.append(node.loc)
         vel.append((node.UL, node.UR))
         node = node.parent
@@ -404,213 +436,89 @@ def backtrace(node):
         f.write(str(node) + '\n' + content)
     
     f.close()
-    return path
-    # if is_start_node(node):
-    #     return path
-    # else:
-    #     backtrace(node.parent)
-    #     path.append((node.x, node.y))
-    #     return 
+    return path 
 
 # main function
 if __name__ == '__main__':
     # get two RPM from user
     # rpm1 = int(input('Enter RPM1: '))
     # rpm2 = int(input('Enter RPM2: '))
-    rpm1 = 10
-    rpm2 = 15
+    rpm1 = 100
+    rpm2 = 150
 
 
-    # get robot radius (177 mm)
-    # r = int(input('Enter robot radius: '))
-    R = 0.177
-
-    # wheel radius
-    r = 0.038
-
-    # get clearance (50 mm)
-    # c = int(input('Enter clearance: '))
-    C = 0.05
-
-    # get step size (100 mm)
-    # d = int(input('Enter robot step size: '))
-    # d = 0.01
-
-    # wheel distance (354 mm)
-    L = 0.354
-
-    # get theta
-    # theta = int(input('Enter mininum angle of turn: '))
-    # theta = 30
+    # Robot Parameters
+    R = 0.177 # robot radius (177 mm)
+    r = 0.038 # wheel radius (38mm)
+    C = 0.05 # robot clearance (50 mm)
+    L = 0.354 # wheel distance (354 mm)
 
     # threshold
     thresh = R + C
 
     # generate map
     world = world_map()
-    # for obs in world:
-    #     obs.pretty_print()
 
-    # Get points
+    
     path = []
     vel = []
+
+    # Get start and goal points
     start_point = startPoint()
     goal_point = goalPoint()
-    print("goal_point", goal_point)
 
-    # thresholds
+    if start_point == None or goal_point == None:
+        exit(0)
+
+    # precision values for checking duplicate nodes
     thresh_d = 0.1
     thresh_theta = 10
 
     t = time.time()
 
     goal_node, explored = explorer(start_point, goal_point)
+    explored = np.asarray(explored)
 
     if (goal_node != None):
         backtrace(goal_node)
         path = np.asarray(path)
-        print("path", path.shape)
-        # print(path)
         m, n, _ = path.shape
         path = np.reshape(path, (n*m, 2))
         vel = np.asarray(vel)
     else:
         print ("No path found")
 
-     # = []
-
     # stop timer
     temp_t = t
     t = time.time()
 
-    # print(len(path))
-    print("All done")
     print('Time taken by algorithm: ', t - temp_t, 'sec')
+    print("Total nodes explored" + str(explored.shape))
 
-    # for loc in path:
-    #     print(loc)
+    # visualize map
+    fig, ax = visualizeMap()
 
-    # world_image = map2.get_world()
-
-    # cv2.imshow("Explored region", world_image)
-    # if cv2.waitKey(0) & 0xff == 27:
-    # # if count == len(explored):
-    #     cv2.destroyAllWindows()
-
-    explored = np.asarray(explored)
-    print("explored", explored.shape)
-
-    # count = 0
-    # for points in explored:
-    #     # print(count)
-    #     count = count + 1
-    #     print(points[0][0], points[0][1])
-    #     print(points[1][0], points[1][1])
-    #     cv2.line(world_image, points[0], points[1], (0, 255, 0))
-    #     # rgb_w[int(cord[0]), int(cord[1]), :] = [255, 0, 0]
-    #     cv2.imshow("Final Path", world_image)
-    #     if count == len(explored):
-    #         cv2.waitKey(0)
-    #         break
-    #     else:
-    #         cv2.waitKey(1)
-
-    fig=plt.figure()
-    ax=fig.add_subplot(1,1,1)
-    ax.axis('equal')
-    ax.set_xlim([-5.5, 5.5])
-    ax.set_ylim([-5.5, 5.5])
-
-    points1 = [[-4.75, 1.75, -3.25, 1.75, 0],
-               [-3.25, 1.75, -3.25, 0.25, 0],
-               [-3.25, 0.25, -4.75, 0.25, 1],
-               [-4.75, 0.25, -4.75, 1.75, 1]]
-
-    points2 = [[-2.75, 3.75, -1.25, 3.75, 0],
-               [-1.25, 3.75, -1.25, 2.25, 0],
-               [-1.25, 2.25, -2.75, 2.25, 1],
-               [-2.75, 2.25, -2.75, 3.75, 1]]
-
-    points3 = [[3.25, 0.75, 4.75, 0.75, 0],
-               [4.75, 0.75, 4.75, -0.75, 0],
-               [4.75, -0.75, 3.25, -0.75, 1],
-               [3.25, -0.75, 3.25, 0.75, 1]]
-
-    points4 = [[-5, 5, 5, 5, 0],
-               [5, 5, 5, -5, 0],
-               [5, -5, -5, -5, 1],
-               [-5, -5, -5, 5, 1]]
-
-    points5 = [[-5.2, 5.2, 5.2, 5.2, 0],
-               [5.2, 5.2, 5.2, -5.2, 0],
-               [5.2, -5.2, -5.2, -5.2, 1],
-               [-5.2, -5.2, -5.2, 5.2, 1]]
-
-
-    for i in range (4):
-        # print(points1[i][0], points1[i][1], points1[i][2], points1[i][3])
-
-        plt.plot( [points1[i][0], points1[i][2]], [points1[i][1], points1[i][3]], color='k', linewidth=1)   
-        plt.plot( [points2[i][0], points2[i][2]], [points2[i][1], points2[i][3]], color='k', linewidth=1)
-        plt.plot( [points3[i][0], points3[i][2]], [points3[i][1], points3[i][3]], color='k', linewidth=1)
-        plt.plot( [points4[i][0], points4[i][2]], [points4[i][1], points4[i][3]], color='k', linewidth=1)
-        plt.plot( [points5[i][0], points5[i][2]], [points5[i][1], points5[i][3]], color='k', linewidth=1)
-
-    circ1 = plt.Circle((-2, -3), 1, fill = False)
-    circ2 = plt.Circle((2, -3), 1, fill = False)
-    circ3 = plt.Circle((0, 0), 1, fill = False)
-    circ4 = plt.Circle((2, 3), 1, fill = False)
-    circ5 = plt.Circle((goal_point[0], goal_point[1]), 0.2, fill = True, color = 'g')
-    circ6 = plt.Circle((start_point[0], start_point[1]), 0.2, fill = True, color = 'r')
-    # ellipse = Ellipse(xy=(150,100), width=80, height=40, 
-    #                         edgecolor='k', fc='None', lw=1)
-
-    ax.add_patch(circ1)
-    ax.add_patch(circ2)
-    ax.add_patch(circ3)
-    ax.add_patch(circ4)
-    ax.add_patch(circ5)
-    ax.add_patch(circ6)
-    # ax.add_patch(ellipse)
     plt.savefig("background.png")
     temp_img = cv2.imread("background.png")
     print(temp_img.shape)
 
+    # video writer
     out = cv2.VideoWriter('Astar.avi', cv2.VideoWriter_fourcc(*'DIVX'), 15,
                               (temp_img.shape[1], temp_img.shape[0]))
 
-    # plt.ion()
-    # plt.show()
-    # plt.pause(60)
+    # plot explored nodes and save video
     count = 0
-    x_point = []
-    y_point = []
     for points in explored:
         count = count + 1
         plt.plot( [points[0][0], points[1][0]], [points[0][1], points[1][1]], color='g', linewidth=0.3)   
-        # plt.pause(0.01)
         if count%10 == 0:
             plt.savefig("Frames/frame" + str(count/10) + ".png")
             frame = cv2.imread("Frames/frame" + str(count/10) + ".png")
-            # print(frame.shape)
             out.write(frame)
         if count%1000 == 0:
             print(count)
-    # out.release()
-
-    # for points in explored:
-    #     # print(count)
-    #     # print(points[0], points[1])
-    #     # x_point.append(points[0])
-    #     # y_point.append(points[1])
-    #     x_point.append(points[0][0])
-    #     y_point.append(points[0][1])
-    #     x_point.append(points[1][0])
-    #     y_point.append(points[1][1])
-
-    # plt.ion()
-    # ax.scatter(x_point, y_point, s=0.05, color='b')
     
+    # plot shortest path
     plt.hold(True)
     loc_x=[start_point[0]]
     loc_y=[start_point[1]]
@@ -620,6 +528,7 @@ if __name__ == '__main__':
    
     ax.scatter(loc_x, loc_y, s=0.2, color='r')
 
+    # Save figure with shortest path
     plt.savefig("Frames/frame" + str(count) + ".png")
     path_img = cv2.imread("Frames/frame" + str(count) + ".png")
     for i in range(75):
@@ -628,30 +537,3 @@ if __name__ == '__main__':
     out.release() 
 
     plt.show()
-
-    # plt.savefig("Path.png")
-
-    # plt.pause(60)
-
-    # cur_dir = os.path.dirname(os.path.abspath(__file__))
-    # img_path = os.path.join(cur_dir, "Frames")
-
-    # temp_img = cv2.imread(os.path.join(img_path, "frame1.png"))
-
-    # out = cv2.VideoWriter('Astar.avi', cv2.VideoWriter_fourcc(*'DIVX'), 15,
-    #                           (temp_img.shape[1], temp_img.shape[0]))
-
-    # frames = []
-    # for name in os.listdir(img_path):
-    #     frame = cv2.imread(os.path.join(img_path, name))
-    #     out.write(frame)
-    #     # frames.append(frame)
-    # out.release()
-
-    #     cv2.circle(world_image, (x, y), r, (255, 0, 0))
-    #     # rgb_w[int(cord[0]), int(cord[1]), :] = [255, 0, 0]
-    #     cv2.imshow("Final Path", world_image)
-    #     if count == len(path):
-    #         cv2.waitKey(0)
-    #     else:
-    #         cv2.waitKey(1)
