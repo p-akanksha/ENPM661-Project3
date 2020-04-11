@@ -1,4 +1,4 @@
-# ENPM661-Project3
+# ENPM661: Project3, Phase 3, 4
 This project is an implementation of A* path planning algorithm in a continuous workspace for a turtlebot, which is a non-holonomic robot. 
 
 To begin with, add the package in a catkin workspace and build the workspace using ```catkin build```.
