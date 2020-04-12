@@ -4,6 +4,7 @@ import numpy as np
 import rospy
 from geometry_msgs.msg import Twist
 import os
+import time
 
 # class get_going():
 
@@ -41,25 +42,34 @@ def get_going():
     dirpath = os.path.dirname(os.path.realpath(__file__))
     file_val = np.load(dirpath + '/params.npy', None, True, True, 'ASCII')
 
+    L = 0.354
     R = 0.177 # robot radius - m 
     r = 0.038 # wheel radius - m
-  
+
     left = file_val[0,:]*r
     right = file_val[1,:]*r
     vel = np.vstack(( left, right )).T
     
     linear = np.mean(vel, axis=1)
     # ccw rot is +ve
-    angular = (right - left)/R 
+    angular = (right - left)/L
 
-    cmd_vel = rospy.Publisher('cmd_vel_mux/input/navi', Twist, queue_size=10)
+    cmd_vel = rospy.Publisher('cmd_vel_mux/input/navi', Twist, queue_size=1000)
+
+    # time.sleep(5)
 
     move_cmd_init = Twist()
     move_cmd_init.linear.x = 0
     move_cmd_init.angular.z = 0
 
+    cmd_vel.publish(move_cmd_init)
+
+    time.sleep(3)
+
     cnt = 0
     move_cmd = Twist()
+
+    
 
     while cnt < len(left):
 
@@ -69,12 +79,18 @@ def get_going():
 
         t0 = rospy.Time.now().to_sec()
         tf = t0
+        print(tf)
+
+        # r = rospy.Rate(10)
 
         while( tf - t0 <= 1):
             cmd_vel.publish(move_cmd)
             tf = rospy.Time.now().to_sec()
-            
+            # r.sleep()
+
         cmd_vel.publish(move_cmd_init)
+
+        
 
 if __name__ == '__main__':
 

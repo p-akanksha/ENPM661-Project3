@@ -154,7 +154,7 @@ def startPoint():
     sx = -4
     sy = -3
     s_th = 0
-    if (sx < -5 or sx >= 5 or sy < -5 or sy >= 5):
+    if (sx <= -5 or sx >= 5 or sy <= -5 or sy >= 5):
         print("Invalid input. Start point lies outside the map")
         return None
 
@@ -172,7 +172,7 @@ def goalPoint():
     # gy = 6.5
     gx = 0
     gy = -3
-    if (gx < -5 or gx >= 5 or gy < -5 or gy >= 5):
+    if (gx <= -5 or gx >= 5 or gy <= -5 or gy >= 5):
         print("Invalid input. Goal point lies outside the map")
         return None
     if (check_collision(explored_nodes(gx, gy, 0, -1, 0, None, 0, 0))):
@@ -377,6 +377,11 @@ def is_start_node(node):
 # function to backtrace the path
 def backtrace(node):
 
+    open('vel.txt', 'w').close() 
+    f = open("vel.txt", "a+")
+    open('nodes_path.txt', 'w').close() 
+    f2 = open("nodes_path.txt", "a+")
+
     filename = 'params.npy'
     left = np.array([])
     right = np.array([])
@@ -385,12 +390,15 @@ def backtrace(node):
     while (not is_start_node(node)):
         path.append(node.loc)
         vel.append((node.UL, node.UR))
-        left = np.append(left,node.UL)
-        right = np.append(right,node.UR)
+        f.write(str(node.UL) + "          " + str(node.UR) + '\n')
+        f2.write(str(node.x) + "          " + str(node.UR) + "          " + str(node.th) + '\n')
+        left = np.insert(left, 0, node.UL)
+        right = np.insert(right, 0 ,node.UR)
         node = node.parent
         count = count + 1
-    print(np.shape(vel))
+    print(left.shape)
     np.save(filename,np.vstack(( left, right )))
+    f.close()
     # print(linear_vel)
     return path
     # if is_start_node(node):
