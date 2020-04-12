@@ -25,8 +25,6 @@ def get_going():
 
     cmd_vel = rospy.Publisher('cmd_vel_mux/input/navi', Twist, queue_size=1000)
 
-    # time.sleep(5)
-
     move_cmd_init = Twist()
     move_cmd_init.linear.x = 0
     move_cmd_init.angular.z = 0
@@ -38,8 +36,6 @@ def get_going():
     cnt = 0
     move_cmd = Twist()
 
-
-
     while not rospy.is_shutdown():
 
         if cnt < len(left):
@@ -50,12 +46,12 @@ def get_going():
             t0 = rospy.Time.now().to_sec()
             tf = t0
 
-            # r = rospy.Rate(10)
+            r = rospy.Rate(10)
 
             while( tf - t0 <= 1):
                 cmd_vel.publish(move_cmd)
                 tf = rospy.Time.now().to_sec()
-                # r.sleep()
+                r.sleep()
                 
             cmd_vel.publish(move_cmd_init)
 
