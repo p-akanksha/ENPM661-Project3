@@ -47,7 +47,7 @@
 	<node name="spawn_turtlebot_model" pkg="gazebo_ros" type="spawn_model"
          args="-x $(arg x_s) -y $(arg y_s) -Y $(arg theta) -unpause -urdf -param robot_description -model turtlebot"/>
 
-	<node name="Astar" pkg ="turtlebot_astar" type="Astar_rigid.py"/> 
+	<node name="Astar" pkg ="turtlebot_astar" type="Astar_rigid.py" output="screen"/> 
 
 	<!-- <node name="spawn_turtlebot_model" pkg="gazebo_ros" type="spawn_model"
          args="-x 5 -y 0 -Y 0 -unpause -urdf -param robot_description -model turtlebot"/>  -->
