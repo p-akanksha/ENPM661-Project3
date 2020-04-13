@@ -439,7 +439,7 @@ if __name__ == '__main__':
         # get robot clearance
         C = input('Enter clearence (in meters): ')
         C=float(C)
-        if (C < 0.1):
+        if (C < 0.4):
             rospy.loginfo("A minimum clearence of 0.1m required.")
             exit(0)
          
