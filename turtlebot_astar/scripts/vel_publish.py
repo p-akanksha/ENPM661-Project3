@@ -1,10 +1,13 @@
 #!/usr/bin/env python
-
 import numpy as np 
 import rospy
 from geometry_msgs.msg import Twist
 import os
 import time
+flag = 0
+
+def callback(data):
+    flag = data.data
 
 def get_going():
     
@@ -55,14 +58,14 @@ def get_going():
                 
             cmd_vel.publish(move_cmd_init)
 
-        
-
 if __name__ == '__main__':
 
     rospy.init_node('vel_publish', anonymous=True)
-
+    rospy.Subscriber("my_flag", Int8, callback)
+    rospy.spin() 
     try:
-        get_going()
+        if flag:
+            get_going()
        
     except rospy.ROSInterruptException:
         print("exception thrown")
