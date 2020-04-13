@@ -11,7 +11,9 @@ Make vel_publish.py and Astar_rigid.py an executable by entering the following i
 
 To find the path and run the simulation, enter the following in the command line. Note that the values corresponding to x_s, y_s, theta in the below command are the starting x, y coordinates (in m) and theta (in radians) respectively.
 
-```roslaunch turtlebot_astar turtlebot_run.launch x_s:=-4 y_s:=-3 theta:=3.14```
+```roslaunch turtlebot_astar turtlebot_run.launch x_s:=4 y_s:=3 theta:=3.14```
+
+These three parameters (x_s, y_s, theta) define the start position of the robot in gazebo. Since the map provided has the coordinate axis flipped, the value of x_s = -x_start, y_s = -y_start and theta = theta_start + 3.14.
 
 Note: Remember to source your workspace in all terminals!
 
