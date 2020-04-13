@@ -6,10 +6,8 @@ import os
 import time
 from std_msgs.msg import Int8
 
-def callback(data):
-    get_going()
-
-def get_going():
+def get_going(data):
+    print('yo')
     dirpath = os.path.dirname(os.path.realpath(__file__))
     file_val = np.load(dirpath + '/params.npy', None, True, True, 'ASCII')
 
@@ -60,6 +58,6 @@ def get_going():
 if __name__ == '__main__':
 
     rospy.init_node('vel_publish', anonymous=True)
-    rospy.Subscriber("/my_flag", Int8, callback)
+    rospy.Subscriber("/my_flag", Int8, get_going)
     rospy.spin() 
     
