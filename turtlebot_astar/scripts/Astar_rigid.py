@@ -425,6 +425,7 @@ def backtrace(node):
 # main function
 if __name__ == '__main__':
     try:
+        time.sleep(10)
         rospy.init_node('Astar', anonymous=True)
         flag_pub = rospy.Publisher('my_flag', 
             Int8, 
