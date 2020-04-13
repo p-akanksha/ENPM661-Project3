@@ -17,9 +17,9 @@ An error message will be displayed for the following:
 # Notes
 
 1. The input values used for the video submission:
-	1. Wheel RPM = [10, 15]
+	1. Wheel RPM = [10, 20]
 	2. Start Point: [-4, -3, 0]
-	3. Goal Point: [4, 2]
+	3. Goal Point: [4, 2.5]
 	4. Clearance: 0.1
 2. As the number of nodes explored can be huge, the video submission displays the explored region that is updated after exploring 10 nodes.
 3. The gaol check threshould is 0.1 m
