@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import os
 import cv2
 import time
@@ -6,7 +7,8 @@ import time
 import numpy as np
 import matplotlib.pyplot as plt
 from Queue import PriorityQueue
-
+import rospy
+from std_msgs.msg import Int8
 class explored_nodes:
     def __init__(self, x, y, th, parent, cost, loc, UL, UR):
         self.x = x
@@ -19,9 +21,9 @@ class explored_nodes:
         self.UL = UL
 
     def pretty_print(self):
-        print(" ")
-        print("x, y, th: ", self.x, self.y, self.th)
-        print("cost: ", self.cost)
+        rospy.loginfo(" ")
+        rospy.loginfo("x, y, th: ", self.x, self.y, self.th)
+        rospy.loginfo("cost: ", self.cost)
         
 
 def getLineParam_rigid(x1, y1, x2, y2, d):
@@ -57,7 +59,7 @@ class obs_polygon():
 
     def pretty_print(self):
         for l in self.lines:
-            print(l)
+            rospy.loginfo(l)
 
     '''
     Input lines contains:
@@ -90,9 +92,9 @@ class obs_ellipse():
         self.radius = radius
 
     def pretty_print(self):
-        print(self.x, self.y)
-        print(self.a, self.b)
-        print(self.radius)
+        rospy.loginfo(self.x, self.y)
+        rospy.loginfo(self.a, self.b)
+        rospy.loginfo(self.radius)
 
 
     def check_collision(self, x, y):
@@ -213,23 +215,27 @@ def visualizeMap():
 
 # function to get start points
 def startPoint():
-    sx = float(input('Enter x coordinate for start point: '))
-    sy = float(input('Enter y coordinate for start point: '))
-    s_th = float(input('Enter theta for start point: '))
+    sx = input('Enter x coordinate for start point: ')
+    sy = input('Enter y coordinate for start point: ')
+    s_th = input('Enter theta for start point: ')
+    sx=float(sx)
+    sy=float(sy)
+    s_th=float(s_th)
 
     if (check_collision(explored_nodes(sx, sy, s_th, -1, 0, None, 0, 0))):
-        print("Invalid input. Start point lies outside the free zone")
+        rospy.loginfo("Invalid input. Start point lies outside the free zone")
         return None
     return sx, sy, s_th
 
 
 # function to get goal points
 def goalPoint():
-    gx = float(input('Enter x coordinate for goal point: '))
-    gy = float(input('Enter y coordinate for goal point: '))
-
+    gx = input('Enter x coordinate for goal point: ')
+    gy = input('Enter y coordinate for goal point: ')
+    gx=float(gx)
+    gy=float(gy)
     if (check_collision(explored_nodes(gx, gy, 0, -1, 0, None, 0, 0))):
-        print("Invalid input. Goal point lies outside the free zone")
+        rospy.loginfo("Invalid input. Goal point lies outside the free zone")
         return None
     return gx, gy
 
@@ -378,7 +384,7 @@ def explorer(start_point, goal_point):
 
         # check if this is the goal
         if goal_check(x, y):
-            print("goal reached")
+            rospy.loginfo("goal reached")
             return cur_node, explored
 
         # get node children
@@ -418,62 +424,73 @@ def backtrace(node):
 
 # main function
 if __name__ == '__main__':
-    # get two RPM from user
-    rpm1 = int(input('Enter RPM1: '))
-    rpm2 = int(input('Enter RPM2: '))
+    try:
+        rospy.init_node('Astar', anonymous=True)
+        flag_pub = rospy.Publisher('my_flag', 
+            Int8, 
+            queue_size=10)
+        rospy.loginfo('Astar')
+        # get two RPM from user
+        rpm1 = input('Enter RPM1: ')
+        rpm2 = input('Enter RPM2: ')
+        rpm1 = int(rpm1)
+        rpm2 = int(rpm2)
+        # get robot clearance
+        C = input('Enter clearence (in meters): ')
+        C=float(C)
+        if (C < 0.1):
+            rospy.loginfo("A minimum clearence of 0.1m required.")
+            exit(0)
+         
 
-    # get robot clearance
-    C = float(input('Enter clearence (in meters): '))
-    if (C < 0.1):
-        print("A minimum clearence of 0.1m required.")
-        exit(0)
-     
+        # Robot Parameters
+        R = 0.177 # robot radius (177 mm)
+        r = 0.038 # wheel radius (38mm)
+        L = 0.354 # wheel distance (354 mm)
 
-    # Robot Parameters
-    R = 0.177 # robot radius (177 mm)
-    r = 0.038 # wheel radius (38mm)
-    L = 0.354 # wheel distance (354 mm)
+        # threshold
+        thresh = R + C
 
-    # threshold
-    thresh = R + C
+        # generate map
+        world = world_map()
 
-    # generate map
-    world = world_map()
+        path = []
 
-    path = []
+        # Get start and goal points
+        start_point = startPoint()
+        if start_point == None:
+            exit(0) 
 
-    # Get start and goal points
-    start_point = startPoint()
-    if start_point == None:
-        exit(0) 
+        goal_point = goalPoint()
+        if goal_point == None:
+            exit(0)
 
-    goal_point = goalPoint()
-    if goal_point == None:
-        exit(0)
+        # precision values for checking duplicate nodes
+        thresh_d = 0.1
+        thresh_theta = 10
 
-    # precision values for checking duplicate nodes
-    thresh_d = 0.1
-    thresh_theta = 10
+        rospy.loginfo("Exploring the map...")
+        t = time.time()
 
-    print("Exploring the map...")
-    t = time.time()
+        goal_node, explored = explorer(start_point, goal_point)
+        explored = np.asarray(explored)
 
-    goal_node, explored = explorer(start_point, goal_point)
-    explored = np.asarray(explored)
+        if (goal_node != None):
+            backtrace(goal_node)
+            path = np.asarray(path)
+        else:
+            rospy.loginfo ("No path found")
 
-    if (goal_node != None):
-        backtrace(goal_node)
-        path = np.asarray(path)
-    else:
-        print ("No path found")
+        # stop timer
+        temp_t = t
+        t = time.time()
 
-    # stop timer
-    temp_t = t
-    t = time.time()
+        rospy.loginfo('Time taken by algorithm: ' + str(t - temp_t) + 'sec')
+        rospy.loginfo("Total nodes explored " + str(len(explored)))
 
-    print('Time taken by algorithm: ' + str(t - temp_t) + 'sec')
-    print("Total nodes explored " + str(len(explored)))
-
+        
+        flag_pub.publish(1)
+    except rospy.ROSInterruptException: pass
     # # visualize map
     # fig, ax = visualizeMap()
 
@@ -494,7 +511,7 @@ if __name__ == '__main__':
     #         frame = cv2.imread("Frames/frame" + str(count/10) + ".png")
     #         out.write(frame)
     #     if count%1000 == 0:
-    #         print(count)
+    #         rospy.loginfo(count)
     
     # # plot shortest path
     # for loc in path:
