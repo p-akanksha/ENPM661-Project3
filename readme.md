@@ -4,7 +4,9 @@ This project is an implementation of A* path planning algorithm in a continuous 
 To begin with, add the package in a catkin workspace and build the workspace using ```catkin build```.
 
 Make vel_publish.py and Astar_rigid.py an executable by entering the following in the terminal opened at the scripts folder of the package: 
+
 ```chmod +x vel_publish.py```
+
 ```chmod +x Astar_rigid.py```
 
 To find the path and run the simulation, enter the following in the command line. Note that the values corresponding to x_s, y_s, theta in the below command are the starting x, y coordinates (in m) and theta (in radians) respectively.
